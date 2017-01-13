@@ -17,10 +17,9 @@ public final class Socket {
     
     fileprivate var socket: WebSocket
     public var enableLogging = true
-    
     public var onConnect: (() -> ())?
     public var onDisconnect: ((NSError?) -> ())?
-    
+    public var onData: ((Data) ->())?
     fileprivate(set) public var channels: [String: Channel] = [:]
     
     fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
@@ -35,10 +34,14 @@ public final class Socket {
     
     // MARK: - Initialisation
     
-    public init(url: URL, params: [String: String]? = nil) {
+    public init(url: URL, params: [String: String]? = nil, headers: [String : String]? = nil) {
         heartbeatQueue = DispatchQueue(label: "com.ecksd.birdsong.hbqueue", attributes: [])
         socket = WebSocket(url: buildURL(url, params: params))
         socket.delegate = self
+        
+        if let headers = headers {
+            socket.headers = headers
+        }
     }
     
     public convenience init(url: String, params: [String: String]? = nil) {
@@ -187,6 +190,7 @@ extension Socket: WebSocketDelegate {
     
     public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         log("Received data: \(data)")
+        onData?(data)
     }
 }
 
