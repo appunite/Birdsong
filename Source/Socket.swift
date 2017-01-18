@@ -20,7 +20,7 @@ public final class Socket {
     public var onConnect: (() -> ())?
     public var onDisconnect: ((NSError?) -> ())?
     public var onData: ((Data) ->())?
-    fileprivate(set) public var channels: [String: Channel] = [:]
+    public var channels: [String: Channel] = [:]
     
     fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
     fileprivate static let HeartbeatPrefix = "hb-"
