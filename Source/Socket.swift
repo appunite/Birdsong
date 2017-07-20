@@ -171,27 +171,13 @@ extension Socket: WebSocketDelegate {
     }
     
     public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        
-        if let data = text.data(using: String.Encoding.utf8),
-            let response = Response(data: data) {
-            defer {
-                awaitingResponses.removeValue(forKey: response.ref)
-            }
-            
-            log("Received message: \(response.payload)")
-            
-            if let push = awaitingResponses[response.ref] {
-                push.handleResponse(response)
-            }
-            
-            channels[response.topic]?.received(response)
-        } else {
-            fatalError("Couldn't parse response: \(text)")
-        }
+        //we use PROTO so there's no message. just data
     }
     
     public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         log("Received data: \(data)")
+        let response = WebsocketResponse(data: data)
+        channels[(response?.topic)!]?.received(response!)           //TO:DO !!!
     }
 }
 

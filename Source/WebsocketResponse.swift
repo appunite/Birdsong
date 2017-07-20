@@ -7,14 +7,13 @@
 //
 
 import Foundation
-import SwiftProtobuf
 
-open class Response {
+open class WebsocketResponse {
     open let ref: String
     open let topic: String
     open let event: String
-    open let payload: Conversation
-    
+    let payload: Conversation
+
     init?(data: Data) {
         do {
             let object = try ChatMessage(serializedData: data)

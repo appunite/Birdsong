@@ -16,27 +16,13 @@ open class Channel {
     fileprivate weak var socket: Socket?
     fileprivate(set) open var state: State
 
-    fileprivate(set) open var presence: Presence
-
-    fileprivate var callbacks: [String: (Response) -> ()] = [:]
-    fileprivate var presenceStateCallback: ((Presence) -> ())?
+    fileprivate var callbacks: [String: (WebsocketResponse) -> ()] = [:] //it was fileprivate var callbacks: [String: (Response) -> ()] = [:]
 
     init(socket: Socket, topic: String, params: Socket.Payload = [:]) {
         self.socket = socket
         self.topic = topic
         self.params = params
         self.state = .Closed
-        self.presence = Presence()
-
-        // Register presence handling.
-		on("presence_state") { [weak self] (response) in
-			self?.presence.sync(response)
-			guard let presence = self?.presence else {return}
-			self?.presenceStateCallback?(presence)
-		}
-		on("presence_diff") { [weak self] (response) in
-			self?.presence.sync(response)
-		}
     }
 
     // MARK: - Control
@@ -55,11 +41,7 @@ open class Channel {
         state = .Leaving
 
         return send(Socket.Event.Leave, payload: [:])?.receive("ok", callback: { response in
-	    self.callbacks.removeAll()
-	    self.presence.onJoin = nil
-            self.presence.onLeave = nil
-            self.presence.onStateChange = nil
-            self.state = .Closed
+            self.callbacks.removeAll()
         })
     }
 
@@ -71,8 +53,7 @@ open class Channel {
     }
 
     // MARK: - Raw events
-
-    func received(_ response: Response) {
+    func received(_ response: WebsocketResponse) {
         if let callback = callbacks[response.event] {
             callback(response)
         }
@@ -81,14 +62,8 @@ open class Channel {
     // MARK: - Callbacks
 
     @discardableResult
-    open func on(_ event: String, callback: @escaping (Response) -> ()) -> Self {
+    open func on(_ event: String, callback: @escaping (WebsocketResponse) -> ()) -> Self {
         callbacks[event] = callback
-        return self
-    }
-
-    @discardableResult
-    open func onPresenceUpdate(_ callback: @escaping (Presence) -> ()) -> Self {
-        presenceStateCallback = callback
         return self
     }
 
