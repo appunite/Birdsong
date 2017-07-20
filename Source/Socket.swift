@@ -23,8 +23,6 @@ public final class Socket<T: ChatMessageProtocol> {
     
     fileprivate(set) public var channels: [String: Channel<T>] = [:]
     
-    fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
-    fileprivate static let HeartbeatPrefix = "hb-"
     fileprivate var heartbeatQueue: DispatchQueue
     
     fileprivate var awaitingResponses = [String: Push]()
@@ -138,17 +136,6 @@ public final class Socket<T: ChatMessageProtocol> {
         
         return message
     }
-    
-    // MARK: - Event constants
-    
-    struct Event {
-        static let Heartbeat = "heartbeat"
-        static let Join = "phx_join"
-        static let Leave = "phx_leave"
-        static let Reply = "phx_reply"
-        static let Error = "phx_error"
-        static let Close = "phx_close"
-    }
 }
 
 extension Socket: WebSocketDelegate {
@@ -209,4 +196,18 @@ private func buildURL(_ url: URL, params: [String: String]?) -> URL {
     guard let url = components.url else { fatalError("Problem with the URL") }
     
     return url
+}
+
+fileprivate let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
+fileprivate let HeartbeatPrefix = "hb-"
+
+// MARK: - Event constants
+
+fileprivate struct Event {
+    static let Heartbeat = "heartbeat"
+    static let Join = "phx_join"
+    static let Leave = "phx_leave"
+    static let Reply = "phx_reply"
+    static let Error = "phx_error"
+    static let Close = "phx_close"
 }
