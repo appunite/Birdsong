@@ -12,13 +12,13 @@ open class Channel<T: ChatMessageProtocol> {
     // MARK: - Properties
     
     open let topic: String
-    open let params: Socket.Payload
-    fileprivate weak var socket: Socket?
+    open let params: [String: Any]
+    fileprivate weak var socket: Socket<T>?
     fileprivate(set) open var state: State
     
     fileprivate var callbacks: [String: (WebsocketResponse<T>) -> ()] = [:] //it was fileprivate var callbacks: [String: (Response) -> ()] = [:]
     
-    init(socket: Socket, topic: String, params: Socket.Payload = [:]) {
+    init(socket: Socket, topic: String, params: [String: Any] = [:]) {
         self.socket = socket
         self.topic = topic
         self.params = params
@@ -47,7 +47,7 @@ open class Channel<T: ChatMessageProtocol> {
     
     @discardableResult
     open func send(_ event: String,
-                   payload: Socket.Payload) -> Push? {
+                   payload: [String: Any]) -> Push? {
         let message = Push(event, topic: topic, payload: payload)
         return socket?.send(message)
     }

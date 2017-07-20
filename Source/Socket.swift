@@ -81,12 +81,12 @@ public final class Socket<T: ChatMessageProtocol> {
     // MARK: - Channels
     
     public func channel(_ topic: String, payload: Payload = [:]) -> Channel {
-        let channel = Channel(socket: self, topic: topic, params: payload)
+        let channel = Channel<T>(socket: self, topic: topic, params: payload)
         channels[topic] = channel
         return channel
     }
     
-    public func remove(_ channel: Channel) {
+    public func remove(_ channel: Channel<T>) {
         channel.leave()?.receive("ok") { [weak self] response in
             self?.channels.removeValue(forKey: channel.topic)
         }
