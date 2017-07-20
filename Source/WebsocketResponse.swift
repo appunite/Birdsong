@@ -7,16 +7,17 @@
 //
 
 import Foundation
+import SwiftProtobuf
 
-open class WebsocketResponse {
+open class WebsocketResponse<M: ChatMessageProtocol> {
     open let ref: String
     open let topic: String
     open let event: String
-    let payload: Conversation
-
+    let payload: PayloadMessageProtocol
+    
     init?(data: Data) {
         do {
-            let object = try ChatMessage(serializedData: data)
+            let object = try M(serializedData: data)
             self.ref = object.reference
             self.topic = object.topic
             self.event = object.event
@@ -26,4 +27,12 @@ open class WebsocketResponse {
             return nil
         }
     }
+}
+
+public protocol PayloadMessageProtocol { }
+public protocol ChatMessageProtocol: SwiftProtobuf.Message {
+    var topic: String               { get set }
+    var event: String               { get set }
+    var payload: PayloadMessageProtocol    { get set }
+    var reference: String           { get set }
 }

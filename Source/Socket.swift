@@ -123,7 +123,7 @@ public final class Socket {
             message.handleNotConnected()
             return message
         }
-
+        
         do {
             let data = try message.toJson()
             log("Sending: \(message.payload)")
