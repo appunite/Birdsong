@@ -8,7 +8,7 @@
 
 import Foundation
 
-open class Channel {
+open class Channel<T: ChatMessageProtocol> {
     // MARK: - Properties
     
     open let topic: String
@@ -16,7 +16,7 @@ open class Channel {
     fileprivate weak var socket: Socket?
     fileprivate(set) open var state: State
     
-    fileprivate var callbacks: [String: (WebsocketResponse) -> ()] = [:] //it was fileprivate var callbacks: [String: (Response) -> ()] = [:]
+    fileprivate var callbacks: [String: (WebsocketResponse<T>) -> ()] = [:] //it was fileprivate var callbacks: [String: (Response) -> ()] = [:]
     
     init(socket: Socket, topic: String, params: Socket.Payload = [:]) {
         self.socket = socket
@@ -53,7 +53,7 @@ open class Channel {
     }
     
     // MARK: - Raw events
-    func received(_ response: WebsocketResponse) {
+    func received(_ response: WebsocketResponse<T>) {
         if let callback = callbacks[response.event] {
             callback(response)
         }
@@ -62,7 +62,7 @@ open class Channel {
     // MARK: - Callbacks
     
     @discardableResult
-    open func on(_ event: String, callback: @escaping (WebsocketResponse) -> ()) -> Self {
+    open func on(_ event: String, callback: @escaping (WebsocketResponse<T>) -> ()) -> Self {
         callbacks[event] = callback
         return self
     }

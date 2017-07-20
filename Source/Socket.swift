@@ -9,7 +9,7 @@
 import Foundation
 import Starscream
 
-public final class Socket {
+public final class Socket<T: ChatMessageProtocol> {
     // MARK: - Convenience aliases
     public typealias Payload = [String: Any]
     
@@ -21,7 +21,7 @@ public final class Socket {
     public var onConnect: (() -> ())?
     public var onDisconnect: ((NSError?) -> ())?
     
-    fileprivate(set) public var channels: [String: Channel] = [:]
+    fileprivate(set) public var channels: [String: Channel<T>] = [:]
     
     fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
     fileprivate static let HeartbeatPrefix = "hb-"
@@ -176,7 +176,7 @@ extension Socket: WebSocketDelegate {
     
     public func websocketDidReceiveData(socket: WebSocket, data: Data) {
         log("Received data: \(data)")
-        let response = WebsocketResponse(data: data)
+        let response = WebsocketResponse<T>(data: data)
         channels[(response?.topic)!]?.received(response!)           //TO:DO !!!
     }
 }
