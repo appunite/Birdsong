@@ -16,7 +16,7 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
     
     init?(data: Data) {
         do {
-            let object = try M(serializedData: data)
+            let object = try M(webSocketData: data)
             self.ref = object.reference
             self.topic = object.topic
             self.event = object.event
