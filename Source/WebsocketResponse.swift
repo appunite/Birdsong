@@ -29,7 +29,8 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
 }
 
 public protocol PayloadMessageProtocol { }
-public protocol ChatMessageProtocol: SwiftProtobuf.Message {
+public protocol ChatMessageProtocol {
+    init(serializedData: Data) throws
     var topic: String                               { get }
     var event: String                               { get }
     var payloadMessage: PayloadMessageProtocol      { get }
