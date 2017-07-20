@@ -30,7 +30,7 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
 
 public protocol PayloadMessageProtocol { }
 public protocol ChatMessageProtocol {
-    init(serializedData: Data) throws
+    init(webSocketData: Data) throws
     var topic: String                               { get }
     var event: String                               { get }
     var payloadMessage: PayloadMessageProtocol      { get }
