@@ -21,7 +21,7 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
             self.ref = object.reference
             self.topic = object.topic
             self.event = object.event
-            self.payload = object.payload
+            self.payload = object.payloadMessage
         } catch {
             print("[Birdsong]: Error parsing Protobuf ")
             return nil
@@ -31,8 +31,8 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
 
 public protocol PayloadMessageProtocol { }
 public protocol ChatMessageProtocol: SwiftProtobuf.Message {
-    var topic: String               { get set }
-    var event: String               { get set }
-    var payload: PayloadMessageProtocol    { get set }
-    var reference: String           { get set }
+    var topic: String               { get }
+    var event: String               { get }
+    var payloadMessage: PayloadMessageProtocol    { get }
+    var reference: String           { get }
 }
