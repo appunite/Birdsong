@@ -12,4 +12,5 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '9.0'
   s.source_files = 'Source/**/*'
   s.dependency 'Starscream', '2.0.1'
+  s.dependency 'SwiftProtobuf', '0.9.904'
 end
