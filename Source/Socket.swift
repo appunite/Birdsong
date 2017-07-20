@@ -97,13 +97,13 @@ public final class Socket<T: ChatMessageProtocol> {
             return
         }
         
-        let ref = Socket.HeartbeatPrefix + UUID().uuidString
+        let ref = HeartbeatPrefix + UUID().uuidString
         _ = send(Push<T>(SocketEvent.Heartbeat, topic: "phoenix", payload: [:], ref: ref))
         queueHeartbeat()
     }
     
     func queueHeartbeat() {
-        let time = DispatchTime.now() + Double(Socket<T>.HeartbeatInterval) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(HeartbeatInterval) / Double(NSEC_PER_SEC)
         heartbeatQueue.asyncAfter(deadline: time) {
             self.sendHeartbeat()
         }

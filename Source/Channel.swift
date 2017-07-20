@@ -18,7 +18,7 @@ open class Channel<T: ChatMessageProtocol> {
     
     fileprivate var callbacks: [String: (WebsocketResponse<T>) -> ()] = [:] //it was fileprivate var callbacks: [String: (Response) -> ()] = [:]
     
-    init(socket: Socket, topic: String, params: [String: Any] = [:]) {
+    init(socket: Socket<T>, topic: String, params: [String: Any] = [:]) {
         self.socket = socket
         self.topic = topic
         self.params = params
