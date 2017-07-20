@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import SwiftProtobuf
 
 open class WebsocketResponse<M: ChatMessageProtocol> {
     open let ref: String
@@ -31,8 +30,8 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
 
 public protocol PayloadMessageProtocol { }
 public protocol ChatMessageProtocol: SwiftProtobuf.Message {
-    var topicProtocol: String               { get }
-    var eventProtocol: String               { get }
-    var payloadProtocol: PayloadMessageProtocol    { get }
-    var referenceProtocol: String           { get }
+    var topic: String                               { get }
+    var event: String                               { get }
+    var payloadMessage: PayloadMessageProtocol      { get }
+    var reference: String                           { get }
 }
