@@ -11,13 +11,13 @@ import Foundation
 public class Push {
     public let topic: String
     public let event: String
-    public let payload: Socket.Payload
+    public let payload: Conversation
     let ref: String?
 
     var receivedStatus: String?
-    var receivedResponse: Socket.Payload?
+    var receivedResponse: Conversation
 
-    fileprivate var callbacks: [String: [(Socket.Payload) -> ()]] = [:]
+    fileprivate var callbacks: [String: [(Conversation) -> ()]] = [:]
     fileprivate var alwaysCallbacks: [() -> ()] = []
 
     // MARK: - JSON parsing
@@ -33,14 +33,14 @@ public class Push {
         return try JSONSerialization.data(withJSONObject: dict, options: JSONSerialization.WritingOptions())
     }
 
-    init(_ event: String, topic: String, payload: Socket.Payload, ref: String = UUID().uuidString) {
+    init(_ event: String, topic: String, payload: Conversation, ref: String = UUID().uuidString) {
         (self.topic, self.event, self.payload, self.ref) = (topic, event, payload, ref)
     }
 
     // MARK: - Callback registration
 
     @discardableResult
-    public func receive(_ status: String, callback: @escaping (Socket.Payload) -> ()) -> Self {
+    public func receive(_ status: String, callback: @escaping (Conversation) -> ()) -> Self {
         if receivedStatus == status,
             let receivedResponse = receivedResponse {
             callback(receivedResponse)
@@ -66,7 +66,7 @@ public class Push {
     // MARK: - Response handling
 
     func handleResponse(_ response: Response) {
-        receivedStatus = response.payload["status"] as? String
+        receivedStatus = "ok" //response.payload["status"] as? String
         receivedResponse = response.payload
 
         fireCallbacksAndCleanup()
