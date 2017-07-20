@@ -17,10 +17,10 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
     init?(data: Data) {
         do {
             let object = try M(serializedData: data)
-            self.ref = object.referenceProtocol
-            self.topic = object.topicProtocol
-            self.event = object.eventProtocol
-            self.payload = object.payloadProtocol
+            self.ref = object.reference
+            self.topic = object.topic
+            self.event = object.event
+            self.payload = object.payloadMessage
         } catch {
             print("[Birdsong]: Error parsing Protobuf ")
             return nil
