@@ -8,10 +8,10 @@
 
 import Foundation
 
-public class Push {
+public class Push<T: ChatMessageProtocol> {
     public let topic: String
     public let event: String
-    public let payload: Socket.Payload
+    public let payload: [String: Any]
     let ref: String?
     
     var receivedStatus: String?
@@ -20,7 +20,7 @@ public class Push {
     fileprivate var callbacks: [String: [(PayloadMessageProtocol) -> ()]] = [:]
     fileprivate var alwaysCallbacks: [() -> ()] = []
     
-    init(_ event: String, topic: String, payload: Socket.Payload, ref: String = UUID().uuidString) {
+    init(_ event: String, topic: String, payload: [String: Any], ref: String = UUID().uuidString) {
         (self.topic, self.event, self.payload, self.ref) = (topic, event, payload, ref)
     }
     
@@ -66,7 +66,7 @@ public class Push {
     
     // MARK: - Response handling
     
-    func handleResponse(_ response: WebsocketResponse<<#M: ChatMessageProtocol#>>) {
+    func handleResponse(_ response: WebsocketResponse<T>) {
         receivedStatus = "ok"
         receivedResponse = response.payload
         

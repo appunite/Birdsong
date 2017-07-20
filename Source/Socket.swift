@@ -25,7 +25,7 @@ public final class Socket<T: ChatMessageProtocol> {
     
     fileprivate var heartbeatQueue: DispatchQueue
     
-    fileprivate var awaitingResponses = [String: Push]()
+    fileprivate var awaitingResponses = [String: Push<T>]()
     
     public var isConnected: Bool {
         return socket.isConnected
@@ -78,7 +78,7 @@ public final class Socket<T: ChatMessageProtocol> {
     
     // MARK: - Channels
     
-    public func channel(_ topic: String, payload: Payload = [:]) -> Channel {
+    public func channel(_ topic: String, payload: Payload = [:]) -> Channel<T> {
         let channel = Channel<T>(socket: self, topic: topic, params: payload)
         channels[topic] = channel
         return channel
@@ -98,12 +98,12 @@ public final class Socket<T: ChatMessageProtocol> {
         }
         
         let ref = Socket.HeartbeatPrefix + UUID().uuidString
-        _ = send(Push(Event.Heartbeat, topic: "phoenix", payload: [:], ref: ref))
+        _ = send(Push<T>(SocketEvent.Heartbeat, topic: "phoenix", payload: [:], ref: ref))
         queueHeartbeat()
     }
     
     func queueHeartbeat() {
-        let time = DispatchTime.now() + Double(Socket.HeartbeatInterval) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Socket<T>.HeartbeatInterval) / Double(NSEC_PER_SEC)
         heartbeatQueue.asyncAfter(deadline: time) {
             self.sendHeartbeat()
         }
@@ -111,12 +111,12 @@ public final class Socket<T: ChatMessageProtocol> {
     
     // MARK: - Sending data
     
-    func send(_ event: String, topic: String, payload: Payload) -> Push {
-        let push = Push(event, topic: topic, payload: payload)
+    func send(_ event: String, topic: String, payload: Payload) -> Push<T> {
+        let push = Push<T>(event, topic: topic, payload: payload)
         return send(push)
     }
     
-    func send(_ message: Push) -> Push {
+    func send(_ message: Push<T>) -> Push<T> {
         if !socket.isConnected {
             message.handleNotConnected()
             return message
@@ -203,7 +203,7 @@ fileprivate let HeartbeatPrefix = "hb-"
 
 // MARK: - Event constants
 
-fileprivate struct Event {
+struct SocketEvent {
     static let Heartbeat = "heartbeat"
     static let Join = "phx_join"
     static let Leave = "phx_leave"

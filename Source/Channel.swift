@@ -28,27 +28,27 @@ open class Channel<T: ChatMessageProtocol> {
     // MARK: - Control
     
     @discardableResult
-    open func join() -> Push? {
+    open func join() -> Push<T>? {
         state = .Joining
         
-        return send(Socket.Event.Join, payload: params)?.receive("ok", callback: { response in
+        return send(SocketEvent.Join, payload: params)?.receive("ok", callback: { response in
             self.state = .Joined
         })
     }
     
     @discardableResult
-    open func leave() -> Push? {
+    open func leave() -> Push<T>? {
         state = .Leaving
         
-        return send(Socket.Event.Leave, payload: [:])?.receive("ok", callback: { response in
+        return send(SocketEvent.Leave, payload: [:])?.receive("ok", callback: { response in
             self.callbacks.removeAll()
         })
     }
     
     @discardableResult
     open func send(_ event: String,
-                   payload: [String: Any]) -> Push? {
-        let message = Push(event, topic: topic, payload: payload)
+                   payload: [String: Any]) -> Push<T>? {
+        let message = Push<T>(event, topic: topic, payload: payload)
         return socket?.send(message)
     }
     
