@@ -12,7 +12,7 @@ open class WebsocketResponse<M: ChatMessageProtocol> {
     open let ref: String
     open let topic: String
     open let event: String
-    let payload: PayloadMessageProtocol
+    open let payload: PayloadMessageProtocol
     
     init?(data: Data) {
         do {
