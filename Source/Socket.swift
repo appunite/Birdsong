@@ -20,7 +20,8 @@ public final class Socket {
     public var onConnect: (() -> ())?
     public var onDisconnect: ((NSError?) -> ())?
     public var onData: ((Data) ->())?
-    public var channels: [String: Channel] = [:]
+    public var onDisconnect: ((Error?) -> ())?
+    fileprivate(set) public var channels: [String: Channel] = [:]
     
     fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
     fileprivate static let HeartbeatPrefix = "hb-"
@@ -90,8 +91,8 @@ public final class Socket {
     }
     
     public func remove(_ channel: Channel) {
-        channel.leave().receive("ok") { response in
-            self.channels.removeValue(forKey: channel.topic)
+        channel.leave()?.receive("ok") { [weak self] response in
+            self?.channels.removeValue(forKey: channel.topic)
         }
     }
     
@@ -122,6 +123,11 @@ public final class Socket {
     }
     
     func send(_ message: Push) -> Push {
+        if !socket.isConnected {
+            message.handleNotConnected()
+            return message
+        }
+
         do {
             let data = try message.toJson()
             log("Sending: \(message.payload)")
@@ -149,46 +155,44 @@ public final class Socket {
     }
 }
 
+// MARK: - WebSocketDelegate
+
 extension Socket: WebSocketDelegate {
-    
-    // MARK: - WebSocketDelegate
-    
-    public func websocketDidConnect(socket: WebSocket) {
-        log("Connected to: \(socket.currentURL)")
+    public func websocketDidConnect(socket: WebSocketClient) {
+        log("Connected to: \(self.socket.currentURL)")
         onConnect?()
         queueHeartbeat()
     }
-    
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        log("Disconnected from: \(socket.currentURL)")
+
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+        log("Disconnected from: \(self.socket.currentURL)")
         onDisconnect?(error)
-        
+
         // Reset state.
         awaitingResponses.removeAll()
         channels.removeAll()
     }
-    
-    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        
+
+    public func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
         if let data = text.data(using: String.Encoding.utf8),
             let response = Response(data: data) {
             defer {
                 awaitingResponses.removeValue(forKey: response.ref)
             }
-            
+
             log("Received message: \(response.payload)")
-            
+
             if let push = awaitingResponses[response.ref] {
                 push.handleResponse(response)
             }
-            
+
             channels[response.topic]?.received(response)
         } else {
             fatalError("Couldn't parse response: \(text)")
         }
     }
-    
-    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
+
+    public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
         log("Received data: \(data)")
         onData?(data)
     }

@@ -12,7 +12,7 @@ import Birdsong
 
 class ViewController: UIViewController {
 
-    let socket = Socket(url: "http://localhost:4000/socket/websocket", params: ["user_id": "asdf"])
+    let socket = Socket(url: "http://localhost:4000/socket/websocket", params: ["user_id": "456"])
     var channel: Channel?
 
     var lastMessageLabel: UILabel
@@ -42,12 +42,13 @@ class ViewController: UIViewController {
 
         let viewSize = view.frame.size
 
+        lastMessageLabel.numberOfLines = 0
         lastMessageLabel.frame = CGRect(x: viewSize.width * 0.1,
                                         y: viewSize.height * 0.15,
                                         width: viewSize.width * 0.8,
                                         height: 100)
 
-        sendMessageButton.setTitle("Send test message", for: UIControlState())
+        sendMessageButton.setTitle("Send message", for: UIControlState())
         sendMessageButton.setTitleColor(UIColor.red, for: UIControlState())
         sendMessageButton.addTarget(self,
                                     action: #selector(sendMessage),
@@ -64,13 +65,13 @@ class ViewController: UIViewController {
 
         // After connection, set up a channel and join it.
         socket.onConnect = {
-            self.channel = self.socket.channel("zone:", payload: ["user": "test"])
+            self.channel = self.socket.channel("rooms:lobby", payload: ["user": "test"])
 
             self.channel?.on("new:msg", callback: { response in
                 self.lastMessageLabel.text = "Received message: \(response.payload["body"]!)"
             })
 
-            self.channel?.join().receive("ok", callback: { payload in
+            self.channel?.join()?.receive("ok", callback: { payload in
                 self.lastMessageLabel.text = "Joined channel: \(self.channel!.topic)"
             }).receive("error", callback: { payload in
                 self.lastMessageLabel.text = "Failed joining channel."
@@ -81,8 +82,8 @@ class ViewController: UIViewController {
         socket.connect()
     }
 
-    func sendMessage() {
-        self.channel?.send("new:msg", payload: ["body": "\(messageCount)"]).always {
+    @objc func sendMessage() {
+        self.channel?.send("new:msg", payload: ["body": "Hello, message no. \(messageCount)"])?.always {
             self.messageCount += 1
         }
     }
