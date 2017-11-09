@@ -45,9 +45,11 @@ open class Channel {
     open func join() -> Push? {
         state = .Joining
 
-        return send(Socket.Event.Join, payload: params)?.receive("ok", callback: { response in
-            self.state = .Joined
-        })
+        return send(Socket.Event.Join, payload: params)
+            
+//            ?.receive("ok", callback: { [weak self] response in
+//            self?.state = .Joined
+//        })
     }
 
     @discardableResult

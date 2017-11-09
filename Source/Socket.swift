@@ -18,7 +18,6 @@ public final class Socket {
     fileprivate var socket: WebSocket
     public var enableLogging = true
     public var onConnect: (() -> ())?
-    public var onDisconnect: ((NSError?) -> ())?
     public var onData: ((Data) ->())?
     public var onDisconnect: ((Error?) -> ())?
     fileprivate(set) public var channels: [String: Channel] = [:]
@@ -40,9 +39,9 @@ public final class Socket {
         socket = WebSocket(url: buildURL(url, params: params))
         socket.delegate = self
         
-        if let headers = headers {
-            socket.headers = headers
-        }
+//        if let headers = headers {
+//            socket.headers = headers
+//        }
     }
     
     public convenience init(url: String, params: [String: String]? = nil) {
@@ -193,7 +192,6 @@ extension Socket: WebSocketDelegate {
     }
 
     public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
-        log("Received data: \(data)")
         onData?(data)
     }
 }
