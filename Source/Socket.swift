@@ -17,9 +17,11 @@ public final class Socket {
     
     fileprivate var socket: WebSocket
     public var enableLogging = true
+    
     public var onConnect: (() -> ())?
-    public var onDisconnect: ((NSError?) -> ())?
+    public var onDisconnect: ((Error?) -> ())?
     public var onData: ((Data) ->())?
+    
     public var channels: [String: Channel] = [:]
     
     fileprivate static let HeartbeatInterval = Int64(30 * NSEC_PER_SEC)
@@ -35,13 +37,18 @@ public final class Socket {
     // MARK: - Initialisation
     
     public init(url: URL, params: [String: String]? = nil, headers: [String : String]? = nil) {
+    
         heartbeatQueue = DispatchQueue(label: "com.ecksd.birdsong.hbqueue", attributes: [])
-        socket = WebSocket(url: buildURL(url, params: params))
-        socket.delegate = self
+        
+        var request = URLRequest(url: buildURL(url, params: params))
+        request.timeoutInterval = 5
         
         if let headers = headers {
-            socket.headers = headers
+            request.allHTTPHeaderFields = headers
         }
+        
+        socket = WebSocket(request: request)
+        socket.delegate = self
     }
     
     public convenience init(url: String, params: [String: String]? = nil) {
@@ -90,8 +97,8 @@ public final class Socket {
     }
     
     public func remove(_ channel: Channel) {
-        channel.leave().receive("ok") { response in
-            self.channels.removeValue(forKey: channel.topic)
+        channel.leave()?.receive("ok") { [weak self] response in
+            self?.channels.removeValue(forKey: channel.topic)
         }
     }
     
@@ -122,6 +129,11 @@ public final class Socket {
     }
     
     func send(_ message: Push) -> Push {
+        if !socket.isConnected {
+            message.handleNotConnected()
+            return message
+        }
+
         do {
             let data = try message.toJson()
             log("Sending: \(message.payload)")
@@ -149,46 +161,44 @@ public final class Socket {
     }
 }
 
+// MARK: - WebSocketDelegate
+
 extension Socket: WebSocketDelegate {
-    
-    // MARK: - WebSocketDelegate
-    
-    public func websocketDidConnect(socket: WebSocket) {
-        log("Connected to: \(socket.currentURL)")
+    public func websocketDidConnect(socket: WebSocketClient) {
+        log("Connected to: \(self.socket.currentURL)")
         onConnect?()
         queueHeartbeat()
     }
-    
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        log("Disconnected from: \(socket.currentURL)")
+
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+        log("Disconnected from: \(self.socket.currentURL)")
         onDisconnect?(error)
-        
+
         // Reset state.
         awaitingResponses.removeAll()
         channels.removeAll()
     }
-    
-    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        
+
+    public func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
         if let data = text.data(using: String.Encoding.utf8),
             let response = Response(data: data) {
             defer {
                 awaitingResponses.removeValue(forKey: response.ref)
             }
-            
+
             log("Received message: \(response.payload)")
-            
+
             if let push = awaitingResponses[response.ref] {
                 push.handleResponse(response)
             }
-            
+
             channels[response.topic]?.received(response)
         } else {
             fatalError("Couldn't parse response: \(text)")
         }
     }
-    
-    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
+
+    public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
         log("Received data: \(data)")
         onData?(data)
     }
