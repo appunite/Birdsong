@@ -8,11 +8,11 @@
 
 import Foundation
 
-open class WebsocketResponse<M: ChatMessageProtocol> {
-    open let ref: String
-    open let topic: String
-    open let event: String
-    open let payload: PayloadMessageProtocol
+public class WebsocketResponse<M: ChatMessageProtocol> {
+    public let ref: String
+    public let topic: String
+    public let event: String
+    public let payload: PayloadMessageProtocol
     
     init?(data: Data) {
         do {

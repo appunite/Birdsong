@@ -142,26 +142,27 @@ extension Socket: WebSocketDelegate {
     
     // MARK: - WebSocketDelegate
     
-    public func websocketDidConnect(socket: WebSocket) {
-        log("Connected to: \(socket.currentURL)")
+    public func websocketDidConnect(socket: WebSocketClient) {
+//        log("Connected to: \(socket.currentURL)")
         onConnect?()
         queueHeartbeat()
     }
     
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        log("Disconnected from: \(socket.currentURL)")
-        onDisconnect?(error)
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
+//        log("Disconnected from: \(socket.currentURL)")
+        let nsError = error as? NSError
+        onDisconnect?(nsError)
         
         // Reset state.
         awaitingResponses.removeAll()
         channels.removeAll()
     }
     
-    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
+    public func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
         //we use PROTO so there's no message. just data
     }
     
-    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
+    public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
         log("Received data: \(data)")
         let response = WebsocketResponse<T>(data: data)
         channels[(response?.topic)!]?.received(response!)           //TO:DO !!!

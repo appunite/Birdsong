@@ -8,11 +8,11 @@
 
 import Foundation
 
-open class Channel<T: ChatMessageProtocol> {
+public class Channel<T: ChatMessageProtocol> {
     // MARK: - Properties
     
-    open let topic: String
-    open let params: [String: Any]
+    public let topic: String
+    public let params: [String: Any]
     fileprivate weak var socket: Socket<T>?
     fileprivate(set) open var state: State
     
