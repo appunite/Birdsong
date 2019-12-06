@@ -47,8 +47,8 @@ class ViewController: UIViewController {
                                         width: viewSize.width * 0.8,
                                         height: 100)
 
-        sendMessageButton.setTitle("Send test message", for: UIControlState())
-        sendMessageButton.setTitleColor(UIColor.red, for: UIControlState())
+        sendMessageButton.setTitle("Send test message", for: UIControl.State())
+        sendMessageButton.setTitleColor(UIColor.red, for: UIControl.State())
         sendMessageButton.addTarget(self,
                                     action: #selector(sendMessage),
                                     for: .touchUpInside)
@@ -81,7 +81,7 @@ class ViewController: UIViewController {
         socket.connect()
     }
 
-    func sendMessage() {
+    @objc func sendMessage() {
         self.channel?.send("new:msg", payload: ["body": "\(messageCount)"]).always {
             self.messageCount += 1
         }

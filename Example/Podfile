@@ -11,7 +11,7 @@ target 'Birdsong_Example' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         puts "[post install] " << target.name << ":" << config.name << " set SWIFT_VERSION to 3.0"
-        config.build_settings['SWIFT_VERSION'] = '3.0'
+        config.build_settings['SWIFT_VERSION'] = '5'
       end
     end
   end

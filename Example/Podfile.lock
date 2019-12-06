@@ -1,19 +1,23 @@
 PODS:
-  - Birdsong (0.4.2):
-    - Starscream (~> 2.0)
-  - Starscream (2.0.0)
+  - Birdsong (0.4.4):
+    - Starscream
+  - Starscream (3.1.1)
 
 DEPENDENCIES:
   - Birdsong (from `../`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Starscream
 
 EXTERNAL SOURCES:
   Birdsong:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Birdsong: 8ce6b370d8d6e2313c8a2922be647f1d0c946840
-  Starscream: 947c865596f0d6bb3f0203fee23228ed2d471468
+  Birdsong: 2f8f3fd46c8a83bee0a489c1c04f1c34530a5e78
+  Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
 
-PODFILE CHECKSUM: fd31310a2947ba719ecd745ba9c1838097125604
+PODFILE CHECKSUM: ca6596cd3e746770149cd3304f5326fa98782509
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.5.3

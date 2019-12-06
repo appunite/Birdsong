@@ -7,12 +7,11 @@
 //
 
 import Foundation
-
-open class Channel {
+public class Channel {
     // MARK: - Properties
 
-    open let topic: String
-    open let params: Socket.Payload
+    public let topic: String
+    let params: Socket.Payload
     fileprivate let socket: Socket
     fileprivate(set) open var state: State
 

@@ -18,7 +18,7 @@ public final class Socket {
     fileprivate var socket: WebSocket
     public var enableLogging = true
     public var onConnect: (() -> ())?
-    public var onDisconnect: ((NSError?) -> ())?
+    public var onDisconnect: ((Error?) -> ())?
     public var onData: ((Data) ->())?
     public var channels: [String: Channel] = [:]
     
@@ -40,7 +40,7 @@ public final class Socket {
         socket.delegate = self
         
         if let headers = headers {
-            socket.headers = headers
+            socket.request.allHTTPHeaderFields = headers
         }
     }
     
@@ -150,17 +150,14 @@ public final class Socket {
 }
 
 extension Socket: WebSocketDelegate {
-    
     // MARK: - WebSocketDelegate
     
-    public func websocketDidConnect(socket: WebSocket) {
-        log("Connected to: \(socket.currentURL)")
+    public func websocketDidConnect(socket: WebSocketClient) {
         onConnect?()
         queueHeartbeat()
     }
     
-    public func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        log("Disconnected from: \(socket.currentURL)")
+    public func websocketDidDisconnect(socket: WebSocketClient, error: Error?) {
         onDisconnect?(error)
         
         // Reset state.
@@ -168,7 +165,7 @@ extension Socket: WebSocketDelegate {
         channels.removeAll()
     }
     
-    public func websocketDidReceiveMessage(socket: WebSocket, text: String) {
+    public func websocketDidReceiveMessage(socket: WebSocketClient, text: String) {
         
         if let data = text.data(using: String.Encoding.utf8),
             let response = Response(data: data) {
@@ -188,7 +185,7 @@ extension Socket: WebSocketDelegate {
         }
     }
     
-    public func websocketDidReceiveData(socket: WebSocket, data: Data) {
+    public func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
         log("Received data: \(data)")
         onData?(data)
     }
